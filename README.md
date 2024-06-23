@@ -6,6 +6,7 @@ Results
 
 ![plot results](plots.png)
 * Can be visual bug in dark theme of github, axis names are presented. Left is time, right is memory.
+* 
 How to run
 ---
 Firstly, [download](https://jmcauley.ucsd.edu/data/amazon_v2/categoryFilesSmall/Musical_Instruments_5.json.gz) dataset. It's Amazon Reviews 2018 data, 5-core subsample of Musical instrumets goods (231,392 reviews). You can look at it in [preprocess.ipynb](preprocess.ipynb)
