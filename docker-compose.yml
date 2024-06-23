@@ -26,37 +26,10 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ./hadoop.env
-  
-  # datanode2:
-  #   image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-  #   container_name: datanode2
-  #   restart: always
-  #   volumes:
-  #     - hadoop_datanode:/hadoop/dfs/data
-  #   environment:
-  #     SERVICE_PRECONDITION: "namenode:9870"
-  #   env_file:
-  #     - ./hadoop.env
-  #   # deploy:
-  #   #   resources:
-  #   #     limits:
-  #   #       memory: 4G  # Ограничение памяти 4 GB
- 
-  # datanode3:
-  #   image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-  #   container_name: datanode3
-  #   restart: always
-  #   volumes:
-  #     - hadoop_datanode:/hadoop/dfs/data
-  #   environment:
-  #     SERVICE_PRECONDITION: "namenode:9870"
-  #   env_file:
-  #     - ./hadoop.env
-  #   # deploy:
-  #   #   resources:
-  #   #     limits:
-  #   #       memory: 4G  # Ограничение памяти 4 GB
-
+    deploy:
+    resources:
+      limits:
+        memory: 4G
     
 
   spark-master:
@@ -65,8 +38,6 @@ services:
     depends_on:
       - namenode
       - datanode1
-      # - datanode2
-      # - datanode3
     ports:
       - "8080:8080"
       - "7077:7077"

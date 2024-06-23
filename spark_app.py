@@ -13,12 +13,12 @@ from utils import parse_arguments
 
 
 def main(num_nodes: int, optimize: bool):
-    # Функция для измерения использования оперативной памяти
+    # Memory
     def get_memory_usage():
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / (1024 * 1024)  # Перевод в МБ
 
-    # Функция для замеров времени
+    # Time & memory
     def measure_time(func):
         def wrapper(*args, **kwargs):
             nonlocal total_time, cumulative_times, total_mems
@@ -35,24 +35,23 @@ def main(num_nodes: int, optimize: bool):
             return result
         return wrapper
     
-    # Настройка логирования
+    # Logging setup
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
-    # Инициализация SparkSession
+    # Init SparkSession
     spark = SparkSession.builder \
         .appName("TF-IDF Classification") \
         .master("spark://spark-master:7077") \
         .getOrCreate()
     spark.conf.set('spark.sql.caseSensitive', True)
 
-    # Установить уровень логирования Spark на ERROR
     spark.sparkContext.setLogLevel("ERROR")
 
     cumulative_times = []
     total_mems = []
     total_time = 0
-    # Загрузка данных
+
     @measure_time
     def load_data():
         df = spark.read.parquet("hdfs://namenode:9001/user/root/data/Musical_Instruments_5.parquet")
@@ -73,43 +72,30 @@ def main(num_nodes: int, optimize: bool):
         df = spark.createDataFrame(rdd, schema=df.schema)
         df.cache()
 
-    # Токенизация текста
     @measure_time
     def tokenize_data(df):
         tokenizer = Tokenizer(inputCol="reviewText", outputCol="words")
         return tokenizer.transform(df)
 
     tokenized_df = tokenize_data(df)
-    # if optimize:
-    #     tokenized_df = tokenized_df.cache()
     logger.info("Tokenization is done.\n")
-    # tokenized_df.show()
 
-    # Удаление стоп-слов
     @measure_time
     def remove_stopwords(df):
         remover = StopWordsRemover(inputCol="words", outputCol="filtered_words")
         return remover.transform(df)
 
     filtered_df = remove_stopwords(tokenized_df)
-    # if optimize:
-    #     filtered_df = filtered_df.cache()
     logger.info("Stopwords removing is done.\n")
-    # filtered_df.show()
 
-    # Применение HashingTF для получения частотного вектора
     @measure_time
     def apply_hashing_tf(df):
         hashingTF = HashingTF(inputCol="filtered_words", outputCol="raw_features", numFeatures=10000)
         return hashingTF.transform(df)
 
     hashed_df = apply_hashing_tf(filtered_df)
-    # if optimize:
-    #     hashed_df = hashed_df.cache()
     logger.info("TF calculating is done.\n")
-    # hashed_df.show()
 
-    # Вычисление IDF
     @measure_time
     def apply_idf(df):
         idf = IDF(inputCol="raw_features", outputCol="features")
@@ -117,24 +103,16 @@ def main(num_nodes: int, optimize: bool):
         return idf_model.transform(df)
 
     rescaled_df = apply_idf(hashed_df)
-    # if optimize:
-    #     rescaled_df = rescaled_df.cache()
     logger.info("IDF calculating is done.\n")
-    # rescaled_df.show()
 
-    # Преобразование меток в числовой формат
     @measure_time
     def index_labels(df):
         label_indexer = StringIndexer(inputCol="overall", outputCol="label")
         return label_indexer.fit(df).transform(df)
 
     indexed_df = index_labels(rescaled_df)
-    # if optimize:
-    #     indexed_df = indexed_df.cache()
     logger.info("Label encoding is done.\n")
-    # indexed_df.show()
 
-    # Построение и обучение модели
     @measure_time
     def train_model(df):
         lr = LogisticRegression(featuresCol="features", labelCol="label", maxIter=10)
@@ -148,7 +126,6 @@ def main(num_nodes: int, optimize: bool):
     model = train_model(train_df)
     logger.info("Model training is done.\n")
 
-    # Оценка модели на тестовых данных
     @measure_time
     def evaluate_model(model, df):
         predictions = model.transform(df)
@@ -159,7 +136,6 @@ def main(num_nodes: int, optimize: bool):
 
     predictions = evaluate_model(model, test_df)
     logger.info("Model evaluation is done.\n")
-    # Показать примеры предсказаний
     predictions.select("reviewText", "overall", "prediction").show()
 
     logger.info(f"Cumulative times: {cumulative_times}")
