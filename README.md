@@ -28,14 +28,17 @@ docker cp spark_app.py spark-worker-1:spark_app.py
 docker cp utils.py spark-worker-1:utils.py 
 docker exec -it spark-worker-1 bash
 ```
+
 Run not spark optimized experiment:
 ```bash
 spark/bin/spark-submit spark_app.py
 ```
+
 Run spark optimized experiment:
 ```bash
 spark/bin/spark-submit spark_app.py -o
 ```
+
 At the end, exit and stop the container:
 ```bash
 exit
@@ -48,10 +51,12 @@ Execute same commands, but compose another container:
 docker-compose -f docker-compose3d.yml up -d
 # Next steps are the same 
 ```
+
 Run not spark optimized experiment:
 ```bash
 spark/bin/spark-submit spark_app.py -n 3
 ```
+
 Run spark optimized experiment:
 ```bash
 spark/bin/spark-submit spark_app.py -n 3 -o
