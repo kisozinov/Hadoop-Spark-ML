@@ -5,7 +5,15 @@ Results
 ---
 
 ![plot results](plots.png)
-* Can be visual bug in dark theme of github, axis names are presented. Left is time, right is memory.
+Here you can see 8 stages at picture on axis $X$:
+* Loading data
+* Tokenizing data
+* Stopwords removing
+* TF hashing
+* IDF calculating
+* Label encoding
+* Training
+* Evaluation
 
 How to run
 ---
