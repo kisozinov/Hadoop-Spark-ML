@@ -6,6 +6,7 @@ Results
 
 ![plot results](plots.png)
 Here you can see 8 stages at picture on axis $X$:
+
 0. Loading data
 1. Tokenizing data
 2. Stopwords removing
