@@ -5,6 +5,7 @@ Results
 ---
 
 ![plot results](plots.png)
+* Can be visual bug in dark theme of github, axis names are presented. Left is time, right is memory.
 
 How to run
 ---
